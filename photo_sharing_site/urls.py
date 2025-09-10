@@ -23,7 +23,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    # App URLs will be added here
+    path('accounts/', include('accounts.urls')),
 ]
 
 # Serve media files during development

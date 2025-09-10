@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "JavaScript Delimiter Checker",
+  "description": "Monitors JavaScript files for delimiter usage and provides feedback on proper semicolon, comma, and bracket usage patterns",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.jsx",
+      "**/*.ts",
+      "**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Please analyze the JavaScript code in the modified files and check for proper delimiter usage including:\n1. Semicolon placement and consistency\n2. Comma usage in object literals, arrays, and function parameters\n3. Proper bracket matching (parentheses, square brackets, curly braces)\n4. Line ending conventions\n5. Any missing or incorrect delimiters that could cause syntax errors\n\nProvide specific feedback on any delimiter issues found and suggest corrections following JavaScript best practices."
+  }
+}

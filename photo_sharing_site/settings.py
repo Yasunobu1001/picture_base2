@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Local apps will be added here
+    # Local apps
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -145,6 +146,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom User Model
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Login/Logout URLs
 LOGIN_URL = '/accounts/login/'

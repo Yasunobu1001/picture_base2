@@ -6,7 +6,7 @@
     <title>{% block title %}写真共有サイト{% endblock %}</title>
     {% load static %}
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+
 </head>
 <body class="h-full bg-gray-50">
     <div class="min-h-full">
@@ -15,23 +15,23 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
-                        <a href="/" class="text-xl font-bold text-primary-600">
+                        <a href="/" class="text-xl font-bold text-blue-600">
                             📸 写真共有サイト
                         </a>
                     </div>
                     <div class="flex items-center space-x-4">
                         {% if user.is_authenticated %}
-                            <a href="#" class="text-gray-700 hover:text-primary-600">マイギャラリー</a>
-                            <a href="#" class="text-gray-700 hover:text-primary-600">アップロード</a>
-                            <a href="#" class="text-gray-700 hover:text-primary-600">公開ギャラリー</a>
+                            <a href="#" class="text-gray-700 hover:text-blue-600">マイギャラリー</a>
+                            <a href="#" class="text-gray-700 hover:text-blue-600">アップロード</a>
+                            <a href="#" class="text-gray-700 hover:text-blue-600">公開ギャラリー</a>
                             <div class="relative">
-                                <span class="text-gray-700">{{ user.username }}</span>
-                                <a href="{% url 'admin:logout' %}" class="ml-2 text-sm text-gray-500 hover:text-primary-600">ログアウト</a>
+                                <span class="text-gray-700">{{ user.username }}さん</span>
+                                <a href="{% url 'accounts:logout' %}" class="ml-2 text-sm text-gray-500 hover:text-blue-600">ログアウト</a>
                             </div>
                         {% else %}
-                            <a href="#" class="text-gray-700 hover:text-primary-600">公開ギャラリー</a>
-                            <a href="#" class="btn-primary">ログイン</a>
-                            <a href="#" class="btn-secondary">新規登録</a>
+                            <a href="#" class="text-gray-700 hover:text-blue-600">公開ギャラリー</a>
+                            <a href="{% url 'accounts:login' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">ログイン</a>
+                            <a href="{% url 'accounts:signup' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">新規登録</a>
                         {% endif %}
                     </div>
                 </div>
@@ -43,9 +43,37 @@
             {% if messages %}
                 <div class="mb-4">
                     {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} bg-{{ message.tags }}-100 border border-{{ message.tags }}-400 text-{{ message.tags }}-700 px-4 py-3 rounded mb-2">
-                            {{ message }}
-                        </div>
+                        {% if message.tags == 'success' %}
+                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-2">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        {{ message }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% elif message.tags == 'error' %}
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-2">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        {{ message }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-2">
+                                {{ message }}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% endif %}
