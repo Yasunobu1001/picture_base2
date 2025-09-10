@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}ホーム - 写真共有サイト{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        写真共有サイトへようこそ
+    </h1>
+    <p class="text-xl text-gray-600 mb-8">
+        あなたの大切な写真を安全に保存・共有しましょう
+    </p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        <div class="card p-6">
+            <div class="text-3xl mb-4">📸</div>
+            <h3 class="text-lg font-semibold mb-2">写真をアップロード</h3>
+            <p class="text-gray-600">JPEG、PNG、GIFファイルを簡単にアップロードできます</p>
+        </div>
+        
+        <div class="card p-6">
+            <div class="text-3xl mb-4">🖼️</div>
+            <h3 class="text-lg font-semibold mb-2">ギャラリー管理</h3>
+            <p class="text-gray-600">写真を整理し、タイトルや説明を追加できます</p>
+        </div>
+        
+        <div class="card p-6">
+            <div class="text-3xl mb-4">🌐</div>
+            <h3 class="text-lg font-semibold mb-2">写真を共有</h3>
+            <p class="text-gray-600">公開設定で他のユーザーと写真を共有できます</p>
+        </div>
+    </div>
+    
+    {% if not user.is_authenticated %}
+    <div class="mt-12">
+        <a href="#" class="btn-primary mr-4">今すぐ始める</a>
+        <a href="#" class="btn-secondary">公開ギャラリーを見る</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

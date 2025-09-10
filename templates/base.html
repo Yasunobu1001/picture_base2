@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}写真共有サイト{% endblock %}</title>
+    {% load static %}
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+</head>
+<body class="h-full bg-gray-50">
+    <div class="min-h-full">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="/" class="text-xl font-bold text-primary-600">
+                            📸 写真共有サイト
+                        </a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        {% if user.is_authenticated %}
+                            <a href="#" class="text-gray-700 hover:text-primary-600">マイギャラリー</a>
+                            <a href="#" class="text-gray-700 hover:text-primary-600">アップロード</a>
+                            <a href="#" class="text-gray-700 hover:text-primary-600">公開ギャラリー</a>
+                            <div class="relative">
+                                <span class="text-gray-700">{{ user.username }}</span>
+                                <a href="{% url 'admin:logout' %}" class="ml-2 text-sm text-gray-500 hover:text-primary-600">ログアウト</a>
+                            </div>
+                        {% else %}
+                            <a href="#" class="text-gray-700 hover:text-primary-600">公開ギャラリー</a>
+                            <a href="#" class="btn-primary">ログイン</a>
+                            <a href="#" class="btn-secondary">新規登録</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} bg-{{ message.tags }}-100 border border-{{ message.tags }}-400 text-{{ message.tags }}-700 px-4 py-3 rounded mb-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-12">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-gray-500 text-sm">
+                    © 2025 写真共有サイト. All rights reserved.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

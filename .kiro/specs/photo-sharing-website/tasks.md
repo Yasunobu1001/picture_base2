@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. プロジェクトセットアップとベース設定
+- [x] 1. プロジェクトセットアップとベース設定
   - Django プロジェクトの初期化と基本設定
   - PostgreSQL データベース接続設定
   - Tailwind CSS の統合とビルド設定
