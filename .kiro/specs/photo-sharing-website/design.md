@@ -2,7 +2,7 @@
 
 ## Overview
 
-写真共有WEBサイトは、Django REST frameworkとPostgreSQLを使用したバックエンドと、Tailwind CSSでスタイリングされたフロントエンドを持つWebアプリケーションです。ユーザー認証、ファイルアップロード、画像処理、レスポンシブデザインを統合したモダンなWebアプリケーションとして設計されています。
+写真共有WEBサイトは、Django 4.2とPostgreSQLを使用したバックエンドと、Tailwind CSSでスタイリングされたフロントエンドを持つWebアプリケーションです。セキュリティ強化、パフォーマンス最適化、画像処理、レスポンシブデザインを統合した本格的なWebアプリケーションとして設計されています。
 
 ## Architecture
 
@@ -17,8 +17,8 @@
 
 ### Django アプリケーション構造
 - `accounts/` - ユーザー認証とプロフィール管理
-- `photos/` - 写真のアップロード、管理、表示
-- `core/` - 共通機能とユーティリティ
+- `photos/` - 写真のアップロード、管理、表示、セキュリティ機能
+- `photo_sharing_site/` - プロジェクト設定とURL設定
 - `static/` - CSS、JavaScript、画像ファイル
 - `media/` - アップロードされた写真ファイル
 - `templates/` - HTMLテンプレート
@@ -58,12 +58,24 @@
   - `updated_at` (DateTimeField)
 
 **Views:**
-- `PhotoListView` - 写真一覧表示（ページネーション付き）
-- `PhotoDetailView` - 写真詳細表示
-- `PhotoUploadView` - 写真アップロード
-- `PhotoUpdateView` - 写真情報編集
-- `PhotoDeleteView` - 写真削除
-- `PublicGalleryView` - 公開写真ギャラリー
+- `PhotoListView` - 写真一覧表示（ページネーション付き、クエリ最適化）
+- `PhotoDetailView` - 写真詳細表示（権限チェック、前後ナビゲーション）
+- `PhotoUploadView` - 写真アップロード（セキュリティ検証、自動最適化）
+- `PhotoUpdateView` - 写真情報編集（所有者権限チェック）
+- `PhotoDeleteView` - 写真削除（確認ダイアログ、ファイル削除）
+- `PublicGalleryView` - 公開写真ギャラリー（パフォーマンス最適化）
+
+**Middleware:**
+- `SecurityHeadersMiddleware` - セキュリティヘッダー追加
+- `LoginAttemptMiddleware` - ログイン試行制限
+- `SessionSecurityMiddleware` - セッションセキュリティ強化
+- `FileUploadSecurityMiddleware` - ファイルアップロードセキュリティ
+- `XSSProtectionMiddleware` - XSS攻撃防止
+
+**Utilities:**
+- `photos/utils.py` - 画像処理、バリデーション、セキュリティ機能
+- `photos/db_optimization.py` - データベース最適化とパフォーマンス監視
+- `photos/health_check.py` - システムヘルスチェック機能
 
 **Templates:**
 - `photos/photo_list.html`
@@ -72,12 +84,25 @@
 - `photos/photo_edit.html`
 - `photos/public_gallery.html`
 
-### 3. Core Utilities (core/)
+### 3. セキュリティ・最適化機能 (photos/)
 
-**Utilities:**
-- `image_validator.py` - 画像ファイル検証
-- `image_processor.py` - サムネイル生成
-- `pagination_helper.py` - ページネーション処理
+**セキュリティ機能:**
+- `validate_image_file()` - 包括的な画像ファイル検証
+- `sanitize_filename()` - ファイル名のサニタイズ
+- セキュリティミドルウェア群 - 多層防御システム
+- CSRF、XSS、セッションハイジャック対策
+
+**パフォーマンス最適化:**
+- `QueryOptimizer` - データベースクエリ最適化
+- `CacheOptimizer` - キャッシュ戦略
+- `monitor_query_performance` - パフォーマンス監視
+- 遅延読み込み（Lazy Loading）
+
+**画像処理:**
+- `create_thumbnail()` - 高品質サムネイル生成
+- `resize_image()` - 自動リサイズと圧縮
+- `compress_image()` - ファイルサイズ最適化
+- EXIF情報処理と回転補正
 
 ## Data Models
 
@@ -155,42 +180,59 @@ class Photo(models.Model):
 ## Performance Optimization
 
 ### Image Handling
-- 自動サムネイル生成（Pillow使用）
-- 遅延読み込み（Lazy Loading）
-- 画像圧縮とWebP対応
-- CDN配信準備（静的ファイル）
+- 自動サムネイル生成（Pillow使用、高品質リサンプリング）
+- 遅延読み込み（Lazy Loading）実装済み
+- 画像圧縮と最適化（段階的品質調整）
+- EXIF情報処理と自動回転補正
+- 複数サイズ画像生成（レスポンシブ対応）
 
 ### Database Optimization
-- 適切なインデックス設定
-- クエリ最適化（select_related, prefetch_related）
-- ページネーション実装
+- 戦略的インデックス設定（作成日時、所有者、公開状態）
+- クエリ最適化（select_related, prefetch_related, only）
+- パフォーマンス監視デコレータ
 - データベース接続プーリング
+- VACUUM ANALYZE自動実行
 
 ### Caching Strategy
-- Django Cache Framework
-- テンプレートキャッシュ
-- 静的ファイルキャッシュ
-- Redis準備（将来的な拡張）
+- 写真数キャッシュ（1時間TTL）
+- ユーザー別キャッシュキー
+- キャッシュフォールバック機能
+- パフォーマンス統計キャッシュ
+
+### Monitoring & Health Checks
+- 基本ヘルスチェック（/health/）
+- 詳細システム監視（/health/detailed/）
+- レディネス・ライブネスチェック
+- リソース使用量監視（CPU、メモリ、ディスク）
 
 ## Security Considerations
 
 ### Authentication & Authorization
-- Django標準認証システム
-- セッション管理
-- パスワードハッシュ化
-- ログイン試行制限
+- Django標準認証システム + カスタム拡張
+- セッションセキュリティ強化（IPアドレス検証）
+- Argon2パスワードハッシュ化
+- ログイン試行制限（IP別、時間制限）
+- セッションハイジャック対策
 
 ### File Security
-- アップロードファイルの検証
-- ファイル名のサニタイズ
-- 実行可能ファイルの拒否
-- ファイルアクセス権限制御
+- 包括的ファイル検証（形式、サイズ、内容）
+- EXIF データセキュリティチェック
+- ファイル名サニタイズ
+- 危険な拡張子・パターン検出
+- アップロード頻度制限
 
 ### Web Security
-- CSRF保護
-- XSS防止
-- セキュアヘッダー設定
-- HTTPS強制（本番環境）
+- CSRF保護（SameSite、HttpOnly）
+- XSS防止（入力サニタイズ、CSP）
+- セキュリティヘッダー（X-Frame-Options、X-Content-Type-Options等）
+- Content Security Policy実装
+- Permissions Policy設定
+
+### Input Validation
+- HTMLエスケープ処理
+- 危険なパターン検出
+- フォームバリデーション強化
+- SQLインジェクション防止（Django ORM）
 
 ## Testing Strategy
 

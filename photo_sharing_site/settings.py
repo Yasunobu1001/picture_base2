@@ -27,7 +27,8 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-sxk-i0*557_hbq11=xv^#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+# Allow hosts from env, fallback to local dev defaults
+ALLOWED_HOSTS = [h.strip() for h in config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',') if h.strip()]
 
 
 # Application definition
@@ -41,15 +42,21 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Local apps
     'accounts',
+    'photos',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'photos.middleware.SecurityHeadersMiddleware',  # セキュリティヘッダー
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'photos.middleware.XSSProtectionMiddleware',  # XSS保護
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'photos.middleware.SessionSecurityMiddleware',  # セッションセキュリティ
+    'photos.middleware.LoginAttemptMiddleware',  # ログイン試行制限
+    'photos.middleware.FileUploadSecurityMiddleware',  # ファイルアップロードセキュリティ
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -87,6 +94,8 @@ DATABASES = {
         'PASSWORD': config('DATABASE_PASSWORD', default=''),
         'HOST': config('DATABASE_HOST', default='localhost'),
         'PORT': config('DATABASE_PORT', default='5432'),
+        'CONN_MAX_AGE': 600,  # 接続プールの最大生存時間（秒）
+        'CONN_HEALTH_CHECKS': True,  # 接続ヘルスチェック
     }
 }
 
@@ -113,9 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
 
@@ -141,6 +150,60 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Security Settings
+# CSRF Protection
+CSRF_COOKIE_SECURE = not DEBUG  # HTTPSでのみCSRFクッキーを送信（本番環境）
+CSRF_COOKIE_HTTPONLY = True  # JavaScriptからCSRFクッキーにアクセス不可
+CSRF_COOKIE_SAMESITE = 'Strict'  # SameSite属性を設定
+CSRF_USE_SESSIONS = False  # CSRFトークンをセッションではなくクッキーに保存
+CSRF_COOKIE_AGE = 31449600  # CSRFクッキーの有効期限（1年）
+
+# Session Security
+SESSION_COOKIE_SECURE = not DEBUG  # HTTPSでのみセッションクッキーを送信（本番環境）
+SESSION_COOKIE_HTTPONLY = True  # JavaScriptからセッションクッキーにアクセス不可
+SESSION_COOKIE_SAMESITE = 'Strict'  # SameSite属性を設定
+SESSION_COOKIE_AGE = 1209600  # セッションの有効期限（2週間）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # ブラウザを閉じてもセッションを保持
+SESSION_SAVE_EVERY_REQUEST = True  # リクエストごとにセッションを保存
+
+# Security Headers
+SECURE_BROWSER_XSS_FILTER = True  # XSS攻撃を防ぐブラウザフィルタを有効化
+SECURE_CONTENT_TYPE_NOSNIFF = True  # MIMEタイプスニッフィングを無効化
+X_FRAME_OPTIONS = 'DENY'  # フレーム内での表示を拒否（クリックジャッキング対策）
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'  # リファラーポリシー
+
+# HTTPS Settings (本番環境用)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True  # HTTPからHTTPSへのリダイレクト
+    SECURE_HSTS_SECONDS = 31536000  # HSTS（HTTP Strict Transport Security）
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # サブドメインにもHSTSを適用
+    SECURE_HSTS_PRELOAD = True  # HSTSプリロードリストに登録可能
+
+# File Upload Security
+FILE_UPLOAD_PERMISSIONS = 0o644  # アップロードファイルの権限
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755  # アップロードディレクトリの権限
+
+# Password Security
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',  # 最も安全
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
+# Login Security
+LOGIN_ATTEMPTS_LIMIT = 5  # ログイン試行回数制限（カスタム実装用）
+LOGIN_ATTEMPTS_TIMEOUT = 300  # ログイン試行制限のタイムアウト（5分）
+
+# Content Security Policy (将来の拡張用)
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'")
+# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+# CSP_IMG_SRC = ("'self'", "data:", "https:")
+# CSP_FONT_SRC = ("'self'",)
+# CSP_CONNECT_SRC = ("'self'",)
+# CSP_FRAME_ANCESTORS = ("'none'",)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

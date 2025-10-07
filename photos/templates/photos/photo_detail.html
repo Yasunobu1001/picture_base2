@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ photo.title|default:"写真詳細" }} - 写真共有サイト{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- ナビゲーション -->
+    <div class="flex items-center justify-between">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    {% if is_owner %}
+                        <a href="{% url 'photos:list' %}" class="text-gray-500 hover:text-gray-700">
+                            マイギャラリー
+                        </a>
+                    {% else %}
+                        <a href="#" class="text-gray-500 hover:text-gray-700">
+                            公開ギャラリー
+                        </a>
+                    {% endif %}
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">写真詳細</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- 前後の写真ナビゲーション -->
+        <div class="flex items-center space-x-2">
+            {% if prev_photo %}
+                <a href="{% url 'photos:detail' prev_photo.pk %}" 
+                   class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    前の写真
+                </a>
+            {% endif %}
+            {% if next_photo %}
+                <a href="{% url 'photos:detail' next_photo.pk %}" 
+                   class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    次の写真
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- メイン写真表示エリア -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="flex flex-col lg:flex-row">
+            <!-- 写真表示部分 -->
+            <div class="lg:flex-1">
+                <div class="relative bg-gray-900">
+                    <img src="{{ photo.image.url }}" 
+                         alt="{{ photo.title }}"
+                         class="w-full h-auto max-h-screen object-contain">
+                </div>
+            </div>
+
+            <!-- 写真情報サイドバー -->
+            <div class="lg:w-80 p-6 border-l border-gray-200">
+                <!-- タイトルと基本情報 -->
+                <div class="space-y-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            {{ photo.title|default:"無題" }}
+                        </h1>
+                        <p class="text-sm text-gray-500 mt-1">
+                            {{ photo.created_at|date:"Y年n月j日 H:i" }}にアップロード
+                        </p>
+                    </div>
+
+                    <!-- 所有者情報 -->
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                            {% if photo.owner.profile_picture %}
+                                <img class="h-10 w-10 rounded-full" src="{{ photo.owner.profile_picture.url }}" alt="{{ photo.owner.username }}">
+                            {% else %}
+                                <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                    <svg class="h-6 w-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ photo.owner.username }}</p>
+                            {% if is_owner %}
+                                <p class="text-xs text-gray-500">あなたの写真</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 説明 -->
+                    {% if photo.description %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900 mb-2">説明</h3>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ photo.description }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- 公開設定 -->
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-900 mb-2">公開設定</h3>
+                        {% if photo.is_public %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                </svg>
+                                公開中
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
+                                    <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
+                                </svg>
+                                非公開
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- 写真のメタデータ -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <h3 class="text-sm font-medium text-gray-900 mb-2">写真情報</h3>
+                        <dl class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <dt class="text-gray-500">ファイル名:</dt>
+                                <dd class="text-gray-900 truncate ml-2">{{ photo.image.name|slice:"11:" }}</dd>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <dt class="text-gray-500">アップロード日:</dt>
+                                <dd class="text-gray-900">{{ photo.created_at|date:"Y/m/d H:i" }}</dd>
+                            </div>
+                            {% if photo.updated_at != photo.created_at %}
+                                <div class="flex justify-between text-xs">
+                                    <dt class="text-gray-500">更新日:</dt>
+                                    <dd class="text-gray-900">{{ photo.updated_at|date:"Y/m/d H:i" }}</dd>
+                                </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+
+                    {% if is_owner %}
+                        <!-- 所有者のみ表示される編集・削除ボタン -->
+                        <div class="border-t border-gray-200 pt-4 space-y-3">
+                            <a href="{% url 'photos:edit' photo.pk %}" 
+                               class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                編集
+                            </a>
+                            <button type="button" 
+                                    onclick="confirmDelete()"
+                                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                削除
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 削除確認モーダル -->
+{% if is_owner %}
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-2">写真を削除</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    この写真を削除してもよろしいですか？<br>
+                    この操作は取り消すことができません。
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <form method="post" action="{% url 'photos:delete' photo.pk %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        削除
+                    </button>
+                </form>
+                <button onclick="closeDeleteModal()" 
+                        class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    キャンセル
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if is_owner %}
+<script>
+function confirmDelete() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// ESCキーでモーダルを閉じる
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
+
+// モーダル背景クリックで閉じる
+document.getElementById('deleteModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

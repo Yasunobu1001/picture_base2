@@ -3,39 +3,37 @@
 {% block title %}ホーム - 写真共有サイト{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="text-4xl font-bold text-gray-900 mb-4">
+<div class="text-center py-16">
+    <h1 class="text-5xl font-bold text-slate-100 mb-6 tracking-tight">
         写真共有サイトへようこそ
     </h1>
-    <p class="text-xl text-gray-600 mb-8">
+    <p class="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
         あなたの大切な写真を安全に保存・共有しましょう
     </p>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-        <div class="card p-6">
-            <div class="text-3xl mb-4">📸</div>
-            <h3 class="text-lg font-semibold mb-2">写真をアップロード</h3>
-            <p class="text-gray-600">JPEG、PNG、GIFファイルを簡単にアップロードできます</p>
-        </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mt-16 max-w-6xl mx-auto">
+        <a href="{% url 'photos:upload' %}"
+           class="card p-8 block transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6),0_0_0_2px_rgba(148,163,184,0.2)] focus:outline-none focus:ring-2 focus:ring-slate-500 group">
+            <div class="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">📸</div>
+            <h3 class="text-xl font-bold mb-3 text-slate-100 uppercase tracking-wide">写真をアップロード</h3>
+            <p class="text-slate-400 leading-relaxed">JPEG、PNG、GIFファイルを簡単にアップロードできます</p>
+        </a>
         
-        <div class="card p-6">
-            <div class="text-3xl mb-4">🖼️</div>
-            <h3 class="text-lg font-semibold mb-2">ギャラリー管理</h3>
-            <p class="text-gray-600">写真を整理し、タイトルや説明を追加できます</p>
-        </div>
+        <a href="{% url 'photos:list' %}"
+           class="card p-8 block transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6),0_0_0_2px_rgba(148,163,184,0.2)] focus:outline-none focus:ring-2 focus:ring-slate-500 group">
+            <div class="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">🖼️</div>
+            <h3 class="text-xl font-bold mb-3 text-slate-100 uppercase tracking-wide">ギャラリー管理</h3>
+            <p class="text-slate-400 leading-relaxed">写真を整理し、タイトルや説明を追加できます</p>
+        </a>
         
-        <div class="card p-6">
-            <div class="text-3xl mb-4">🌐</div>
-            <h3 class="text-lg font-semibold mb-2">写真を共有</h3>
-            <p class="text-gray-600">公開設定で他のユーザーと写真を共有できます</p>
-        </div>
+        <a href="{% url 'photos:public_gallery' %}"
+           class="card p-8 block transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6),0_0_0_2px_rgba(148,163,184,0.2)] focus:outline-none focus:ring-2 focus:ring-slate-500 group">
+            <div class="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">🌐</div>
+            <h3 class="text-xl font-bold mb-3 text-slate-100 uppercase tracking-wide">写真を共有</h3>
+            <p class="text-slate-400 leading-relaxed">公開設定で他のユーザーと写真を共有できます</p>
+        </a>
     </div>
     
-    {% if not user.is_authenticated %}
-    <div class="mt-12">
-        <a href="#" class="btn-primary mr-4">今すぐ始める</a>
-        <a href="#" class="btn-secondary">公開ギャラリーを見る</a>
-    </div>
-    {% endif %}
+    <div class="mt-20"></div>
 </div>
 {% endblock %}

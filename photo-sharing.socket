@@ -1,0 +1,14 @@
+# Systemdソケットファイル - 写真共有サイト用
+# /etc/systemd/system/photo-sharing.socket に配置してください
+
+[Unit]
+Description=写真共有サイト Gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn/photo_sharing.sock
+SocketUser=www-data
+SocketGroup=www-data
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target

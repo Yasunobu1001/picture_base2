@@ -1,0 +1,59 @@
+# Systemdサービスファイル - 写真共有サイト用
+# /etc/systemd/system/photo-sharing.service に配置してください
+
+[Unit]
+Description=写真共有サイト Gunicorn daemon
+Requires=photo-sharing.socket
+After=network.target postgresql.service redis.service
+
+[Service]
+Type=notify
+# ユーザーとグループ（適切に変更してください）
+User=www-data
+Group=www-data
+
+# 作業ディレクトリ
+WorkingDirectory=/var/www/photo_sharing
+
+# 実行コマンド
+ExecStart=/var/www/photo_sharing/venv/bin/gunicorn \
+    --config /var/www/photo_sharing/gunicorn.conf.py \
+    --bind unix:/run/gunicorn/photo_sharing.sock \
+    photo_sharing_site.wsgi:application
+
+# リロードコマンド
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# プロセス管理
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+# 環境変数
+Environment=DJANGO_SETTINGS_MODULE=photo_sharing_site.production_settings
+EnvironmentFile=/var/www/photo_sharing/.env.production
+
+# セキュリティ設定
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/www/photo_sharing/media /var/log/gunicorn /var/log/django
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+
+# リソース制限
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# 再起動設定
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
