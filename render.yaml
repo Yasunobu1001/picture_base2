@@ -12,7 +12,7 @@ services:
     startCommand: "gunicorn --config gunicorn_render.conf.py photo_sharing_site.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
