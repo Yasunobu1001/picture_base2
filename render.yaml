@@ -1,0 +1,44 @@
+# Render デプロイ設定ファイル
+# 写真共有サイト - Django アプリケーション
+
+services:
+  # Web サービス (Django + Gunicorn)
+  - type: web
+    name: photo-sharing-web
+    runtime: python
+    plan: starter  # free, starter, standard, pro から選択
+    region: oregon  # oregon, frankfurt, singapore から選択
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn --config gunicorn_render.conf.py photo_sharing_site.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: photo-sharing-db
+          property: connectionString
+    healthCheckPath: /health/
+    autoDeploy: true
+
+  # PostgreSQL データベース
+  - type: pgsql
+    name: photo-sharing-db
+    plan: starter  # free, starter, standard, pro から選択
+    region: oregon
+    databaseName: photo_sharing_db
+    databaseUser: photo_sharing_user
+    ipAllowList: []  # 空の場合は全てのIPを許可
+
+  # Redis (キャッシュ・セッション用) - オプション
+  # - type: redis
+  #   name: photo-sharing-redis
+  #   plan: starter
+  #   region: oregon
+  #   maxmemoryPolicy: allkeys-lru
+  #   ipAllowList: []

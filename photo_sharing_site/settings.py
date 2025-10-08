@@ -86,18 +86,34 @@ WSGI_APPLICATION = 'photo_sharing_site.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME', default='photo_sharing_db'),
-        'USER': config('DATABASE_USER', default='postgres'),
-        'PASSWORD': config('DATABASE_PASSWORD', default=''),
-        'HOST': config('DATABASE_HOST', default='localhost'),
-        'PORT': config('DATABASE_PORT', default='5432'),
-        'CONN_MAX_AGE': 600,  # 接続プールの最大生存時間（秒）
-        'CONN_HEALTH_CHECKS': True,  # 接続ヘルスチェック
+# Render用のDATABASE_URL対応
+import dj_database_url
+
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    # Renderなどの環境でDATABASE_URLが提供される場合
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # ローカル開発環境用
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DATABASE_NAME', default='photo_sharing_db'),
+            'USER': config('DATABASE_USER', default='postgres'),
+            'PASSWORD': config('DATABASE_PASSWORD', default=''),
+            'HOST': config('DATABASE_HOST', default='localhost'),
+            'PORT': config('DATABASE_PORT', default='5432'),
+            'CONN_MAX_AGE': 600,  # 接続プールの最大生存時間（秒）
+            'CONN_HEALTH_CHECKS': True,  # 接続ヘルスチェック
+        }
+    }
 
 
 # Password validation
