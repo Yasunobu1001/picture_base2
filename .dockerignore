@@ -1,0 +1,107 @@
+# Git関連
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# 仮想環境
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 開発・テスト用ファイル
+verify_setup.py
+test_*.py
+*_test.py
+*.test.py
+tests/
+testing/
+
+# Kiro IDE
+.kiro/
+
+# 設定ファイル
+.env
+.env.*
+local_settings.py
+
+# ログファイル
+*.log
+logs/
+
+# 一時ファイル
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 開発用静的ファイル
+static/css/input.css
+
+# メディアファイル（本番では別途マウント）
+media/photos/
+media/thumbnails/
+media/profiles/
+
+# ドキュメント
+README.md
+DEPLOYMENT.md
+PRODUCTION_CHECKLIST.md
+
+# 開発用スクリプト
+deploy.py
+
+# データベースファイル
+*.sqlite3
+*.db
+
+# SSL証明書（別途管理）
+*.pem
+*.key
+*.crt
+*.csr
+
+# バックアップファイル
+*.sql
+*.dump

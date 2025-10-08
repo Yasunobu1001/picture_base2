@@ -229,6 +229,112 @@ class DeploymentManager:
         
         print("ディレクトリセットアップ完了")
     
+    def cleanup_development_files(self):
+        """本番環境で不要な開発用ファイルを削除"""
+        print("=== 開発用ファイルクリーンアップ ===")
+        
+        # 削除対象のファイル・ディレクトリ
+        cleanup_targets = [
+            # 開発・テスト用ファイル
+            'verify_setup.py',
+            'test_*.py',
+            '*_test.py',
+            '*.test.py',
+            
+            # Kiro IDE関連
+            '.kiro/',
+            
+            # 開発用設定ファイル
+            '.env.example',
+            'local_settings.py',
+            
+            # テスト・カバレッジファイル
+            '.coverage',
+            'htmlcov/',
+            '.pytest_cache/',
+            
+            # 一時ファイル
+            '*.tmp',
+            '*.temp',
+            '*.bak',
+            '*.backup',
+            
+            # IDE設定
+            '.vscode/',
+            '.idea/',
+            
+            # ログファイル（本番では別途管理）
+            '*.log',
+            
+            # Node.js開発ファイル
+            'node_modules/',
+            'npm-debug.log*',
+            
+            # Python キャッシュ
+            '__pycache__/',
+            '*.pyc',
+            '*.pyo',
+        ]
+        
+        import glob
+        import shutil
+        
+        removed_count = 0
+        for pattern in cleanup_targets:
+            matches = glob.glob(str(self.base_dir / pattern), recursive=True)
+            for match in matches:
+                try:
+                    match_path = Path(match)
+                    if match_path.is_file():
+                        match_path.unlink()
+                        print(f"削除: {match_path.relative_to(self.base_dir)}")
+                        removed_count += 1
+                    elif match_path.is_dir():
+                        shutil.rmtree(match_path)
+                        print(f"削除: {match_path.relative_to(self.base_dir)}/")
+                        removed_count += 1
+                except (OSError, PermissionError) as e:
+                    print(f"警告: {match} の削除に失敗: {e}")
+        
+        print(f"クリーンアップ完了: {removed_count}個のファイル/ディレクトリを削除")
+    
+    def create_production_requirements(self):
+        """本番用requirements.txtを作成"""
+        print("=== 本番用requirements.txt作成 ===")
+        
+        # 開発用パッケージを除外した本番用requirements.txt
+        production_packages = [
+            'Django==4.2.24',
+            'psycopg2-binary==2.9.9',
+            'Pillow==10.1.0',
+            'whitenoise==6.6.0',
+            'python-decouple==3.8',
+            'gunicorn==21.2.0',  # 本番用WSGIサーバー
+            'psutil==5.9.6',     # システム監視用
+        ]
+        
+        # 開発用パッケージ（本番では不要）
+        development_packages = [
+            'pytest',
+            'pytest-django',
+            'coverage',
+            'factory-boy',
+            'django-debug-toolbar',
+            'ipython',
+            'jupyter',
+        ]
+        
+        requirements_prod_path = self.base_dir / 'requirements-production.txt'
+        
+        with open(requirements_prod_path, 'w', encoding='utf-8') as f:
+            f.write("# 本番環境用パッケージ\n")
+            f.write("# 開発・テスト用パッケージは除外済み\n\n")
+            for package in production_packages:
+                f.write(f"{package}\n")
+        
+        print(f"本番用requirements.txt作成完了: {requirements_prod_path}")
+        return requirements_prod_path
+    
     def full_deployment(self):
         """完全デプロイメント"""
         print("=== 完全デプロイメント開始 ===")
@@ -237,6 +343,9 @@ class DeploymentManager:
         if not self.check_environment():
             print("環境チェックに失敗しました")
             return False
+        
+        # 本番用requirements.txt作成
+        self.create_production_requirements()
         
         # ディレクトリセットアップ
         self.setup_directories()
@@ -253,9 +362,12 @@ class DeploymentManager:
         # 静的ファイル収集
         self.collect_static_files()
         
-        # テスト実行
+        # テスト実行（本番デプロイ前の最終確認）
         if not self.run_tests():
             print("警告: テストに失敗しましたが、デプロイを続行します")
+        
+        # 開発用ファイルクリーンアップ
+        self.cleanup_development_files()
         
         # スーパーユーザー作成
         self.create_superuser()
@@ -268,6 +380,9 @@ class DeploymentManager:
         print("3. SSL証明書の設定")
         print("4. ファイアウォールの設定")
         print("5. 監視・ログ設定の確認")
+        print("\n本番用ファイル:")
+        print("- requirements-production.txt: 本番用パッケージリスト")
+        print("- 開発用ファイルは自動削除済み")
         
         return True
 
@@ -280,6 +395,7 @@ def main():
     parser.add_argument('--static', action='store_true', help='静的ファイル収集のみ実行')
     parser.add_argument('--test', action='store_true', help='テストのみ実行')
     parser.add_argument('--css', action='store_true', help='CSS ビルドのみ実行')
+    parser.add_argument('--cleanup', action='store_true', help='開発用ファイルクリーンアップのみ実行')
     parser.add_argument('--full', action='store_true', help='完全デプロイメント実行')
     
     args = parser.parse_args()
@@ -296,6 +412,8 @@ def main():
         deployment.run_tests()
     elif args.css:
         deployment.build_css()
+    elif args.cleanup:
+        deployment.cleanup_development_files()
     elif args.full:
         deployment.full_deployment()
     else:
