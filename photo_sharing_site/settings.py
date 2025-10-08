@@ -158,7 +158,11 @@ STATICFILES_DIRS = [
 
 # Media files (User uploaded content)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Render環境では /tmp を使用（再起動時にクリアされる）
+if not DEBUG:
+    MEDIA_ROOT = '/tmp/media'
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # WhiteNoise configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -170,10 +174,11 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 # Security Settings
 # CSRF Protection
 CSRF_COOKIE_SECURE = not DEBUG  # HTTPSでのみCSRFクッキーを送信（本番環境）
-CSRF_COOKIE_HTTPONLY = True  # JavaScriptからCSRFクッキーにアクセス不可
-CSRF_COOKIE_SAMESITE = 'Strict'  # SameSite属性を設定
+CSRF_COOKIE_HTTPONLY = False  # JavaScriptからのアクセスを許可（フォーム送信に必要）
+CSRF_COOKIE_SAMESITE = 'Lax'  # Laxに変更（Strictは厳しすぎる場合がある）
 CSRF_USE_SESSIONS = False  # CSRFトークンをセッションではなくクッキーに保存
 CSRF_COOKIE_AGE = 31449600  # CSRFクッキーの有効期限（1年）
+CSRF_TRUSTED_ORIGINS = ['https://picture-base.onrender.com'] if not DEBUG else []
 
 # Session Security
 SESSION_COOKIE_SECURE = not DEBUG  # HTTPSでのみセッションクッキーを送信（本番環境）
@@ -233,3 +238,25 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

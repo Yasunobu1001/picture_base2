@@ -17,7 +17,12 @@ python manage.py collectstatic --no-input
 
 # データベースマイグレーション
 echo "🗄️  データベースマイグレーションを実行中..."
-python manage.py migrate --no-input
+if python manage.py migrate --no-input; then
+    echo "✅ マイグレーション成功"
+else
+    echo "❌ マイグレーション失敗"
+    exit 1
+fi
 
 # スーパーユーザーの作成（環境変数が設定されている場合）
 if [[ -n "$DJANGO_SUPERUSER_USERNAME" && -n "$DJANGO_SUPERUSER_EMAIL" && -n "$DJANGO_SUPERUSER_PASSWORD" ]]; then
