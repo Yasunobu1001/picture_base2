@@ -5,10 +5,11 @@
 各アプリケーションのURLは個別のurls.pyファイルで管理されています。
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.views.static import serve as static_serve
 from django.contrib.sitemaps.views import sitemap
 from django.http import HttpResponse
 from photos.health_check import health_check, health_check_detailed, readiness_check, liveness_check
@@ -69,6 +70,12 @@ if settings.DEBUG:
         ] + urlpatterns
     except ImportError:
         pass
+
+# In production, explicitly serve MEDIA via Django (small apps / Render)
+if not settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
 # カスタムエラーページ（本番環境用）
 handler404 = 'django.views.defaults.page_not_found'

@@ -15,3 +15,14 @@ class PhotosConfig(AppConfig):
         except Exception:
             # If the library is missing or fails to register, continue gracefully
             pass
+        # Ensure MEDIA_ROOT exists (Render ephemeral filesystem)
+        try:
+            import os
+            from django.conf import settings
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            # Common subdirs
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'photos'), exist_ok=True)
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'thumbnails'), exist_ok=True)
+        except Exception:
+            # Do not block startup on failure
+            pass
