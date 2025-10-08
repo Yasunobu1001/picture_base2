@@ -28,7 +28,7 @@ class PhotoUploadForm(forms.ModelForm):
             }),
             'image': forms.FileInput(attrs={
                 'class': 'hidden',
-                'accept': 'image/jpeg,image/jpg,image/png,image/gif',
+                'accept': 'image/*',
                 'id': 'photo-upload-input',
                 'capture': 'environment'
             }),
@@ -103,9 +103,17 @@ class PhotoUploadForm(forms.ModelForm):
                 raise forms.ValidationError('ファイルサイズが大きすぎます。10MB以下のファイルをアップロードしてください。')
             
             # ファイル形式チェック
-            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+            allowed_types = [
+                'image/jpeg', 
+                'image/jpg', 
+                'image/png', 
+                'image/gif',
+                'image/webp',
+                'image/heic',
+                'image/heif'
+            ]
             if image.content_type not in allowed_types:
-                raise forms.ValidationError('サポートされていないファイル形式です。JPEG、PNG、GIFファイルのみアップロード可能です。')
+                raise forms.ValidationError(f'サポートされていないファイル形式です（{image.content_type}）。JPEG、PNG、GIF、WebP、HEIC形式のみアップロード可能です。')
             
             # ファイル名のサニタイズ
             if hasattr(image, 'name') and image.name:
