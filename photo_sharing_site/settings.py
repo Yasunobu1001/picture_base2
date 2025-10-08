@@ -54,10 +54,10 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'photos.middleware.XSSProtectionMiddleware',  # XSS保護
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',  # メッセージミドルウェア（カスタムミドルウェアより前）
     'photos.middleware.SessionSecurityMiddleware',  # セッションセキュリティ
     'photos.middleware.LoginAttemptMiddleware',  # ログイン試行制限
     'photos.middleware.FileUploadSecurityMiddleware',  # ファイルアップロードセキュリティ
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
