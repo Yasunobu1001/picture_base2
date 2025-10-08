@@ -25,19 +25,18 @@ def validate_image_file(file):
     if file.size < min_size:
         raise ValidationError('ファイルサイズが小さすぎます。有効な画像ファイルをアップロードしてください。')
     
-    # ファイル形式チェック
-    allowed_formats = ['JPEG', 'PNG', 'GIF']
-    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif']
+    # ファイル形式チェック（Pillowが解釈できる形式を優先）
+    allowed_formats = ['JPEG', 'PNG', 'GIF', 'WEBP', 'HEIC', 'HEIF']
+    # 拡張子は許容範囲を広げる（危険拡張子のみ拒否）
+    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif']
     dangerous_extensions = ['.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.js', '.jar', '.php', '.asp', '.jsp']
     
-    # 拡張子チェック
+    # 拡張子チェック（危険拡張子は拒否、それ以外は後段の実体チェックで判定）
     file_extension = os.path.splitext(file.name)[1].lower()
-    if file_extension not in allowed_extensions:
-        raise ValidationError('サポートされていないファイル形式です。JPEG、PNG、GIFファイルのみアップロード可能です。')
-    
-    # 危険な拡張子のチェック
     if file_extension in dangerous_extensions:
         raise ValidationError('セキュリティ上の理由により、このファイル形式はアップロードできません。')
+    
+    # ここでの拡張子は参考情報として扱う（危険拡張子は既にブロック済み）
     
     # ファイル名のセキュリティチェック
     if not _is_safe_filename(file.name):
@@ -49,9 +48,9 @@ def validate_image_file(file):
         file.seek(0)
         image = Image.open(file)
         
-        # 画像形式チェック
+        # 画像形式チェック（実体優先）
         if image.format not in allowed_formats:
-            raise ValidationError('サポートされていない画像形式です。JPEG、PNG、GIFファイルのみアップロード可能です。')
+            raise ValidationError('サポートされていない画像形式です。JPEG、PNG、GIF、WEBP、HEIC形式のみアップロード可能です。')
         
         # 画像サイズの妥当性チェック
         width, height = image.size

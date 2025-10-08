@@ -264,8 +264,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // プレビューを表示
             showPreview(compressedFile);
         } catch (error) {
-            console.error('画像圧縮エラー:', error);
-            alert('画像の処理中にエラーが発生しました。');
+            console.warn('画像圧縮に失敗しました。元ファイルをそのままアップロードします。', error);
+            // HEICなどブラウザでデコードできない場合は元ファイルで継続
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            showPreview(file);
         }
     }
 
@@ -308,8 +312,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     canvas.toBlob(
                         function(blob) {
                             if (blob) {
-                                // 元のファイル名を保持
-                                const compressedFile = new File([blob], file.name, {
+                                // 拡張子を.jpgに付け替え
+                                const newName = (function(name){
+                                    const idx = name.lastIndexOf('.');
+                                    if (idx === -1) return name + '.jpg';
+                                    return name.substring(0, idx) + '.jpg';
+                                })(file.name);
+                                const compressedFile = new File([blob], newName, {
                                     type: 'image/jpeg',
                                     lastModified: Date.now()
                                 });
